@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ramsey Rampage Timer</title>
+  <style>
+    body { font-family: sans-serif; padding: 10px; background: #f4f4f4; margin: 0; }
+    h1 { text-align: center; font-size: 1.8rem; }
+    .category { background: #fff; padding: 10px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .racer-row { display: flex; flex-wrap: wrap; gap: 5px; margin: 5px 0; }
+    .racer-row input { flex: 2 1 auto; padding: 5px; min-width: 100px; }
+    .racer-row button { flex: 1 1 auto; padding: 5px; font-size: 0.9rem; }
+    .results { background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow-x: auto; }
+    .results table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .results th, .results td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    #resetBtn { margin: 15px auto; display: block; padding: 10px 15px; font-size: 1rem; border: none; border-radius: 5px; background-color: #ff5555; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<h1>Ramsey Rampage Timer</h1>
+
+<div id="categories"></div>
+
+<button id="resetBtn" onclick="resetResults()">Reset All Results</button>
+
+<h2>Main Results</h2>
+<div class="results">
+  <table id="resultsTable">
+    <thead>
+      <tr><th>Category</th><th>Racer</th><th>Start Time</th><th>Finish Time</th><th>Elapsed</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  const categories = ['Ramsey Rampage', 'The Grand Return', 'Capitol Crush'];
+
+  function formatTime(date) {
+    return date.toLocaleTimeString();
+  }
+
+  function createCategory(name) {
+    const div = document.createElement('div');
+    div.className = 'category';
+
+    const title = document.createElement('h2');
+    title.textContent = name;
+    div.appendChild(title);
+
+    for (let i = 1; i <= 10; i++) {
+      const row = document.createElement('div');
+      row.className = 'racer-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Racer #${i}" class="racer-name">
+        <button onclick="start(this)">Start</button>
+        <button onclick="finish(this)">Finish</button>
+      `;
+      div.appendChild(row);
+    }
+
+    document.getElementById('categories').appendChild(div);
+  }
+
+  function start(btn) {
+    const row = btn.parentElement;
+    row.dataset.start = Date.now();
+    row.style.background = '#d1ffd1';
+  }
+
+  function finish(btn) {
+    const row = btn.parentElement;
+    const nameInput = row.querySelector('.racer-name');
+    const name = nameInput.value || 'Unnamed';
+    const category = row.closest('.category').querySelector('h2').textContent;
+
+    if (!row.dataset.start) {
+      alert('Start time not recorded');
+      return;
+    }
+
+    const startTime = new Date(parseInt(row.dataset.start));
+    const finishTime = new Date();
+    const elapsed = ((finishTime - startTime) / 1000).toFixed(2);
+
+    const table = document.querySelector('#resultsTable tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${category}</td>
+      <td>${name}</td>
+      <td>${formatTime(startTime)}</td>
+      <td>${formatTime(finishTime)}</td>
+      <td>${elapsed} sec</td>
+    `;
+    table.appendChild(tr);
+
+    row.style.background = '#ffd1d1';
+  }
+
+  function resetResults() {
+    document.querySelector('#resultsTable tbody').innerHTML = '';
+    document.querySelectorAll('.racer-row').forEach(row => {
+      row.dataset.start = '';
+      row.style.background = '';
+      row.querySelector('.racer-name').value = '';
+    });
+  }
+
+  categories.forEach(createCategory);
+</script>
+
+</body>
+</html>
